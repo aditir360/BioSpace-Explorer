@@ -1,0 +1,859 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/remixicon@4.1.0/fonts/remixicon.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+    <title>Resources - BioSpace Explorer</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <style>
+      .btn {
+        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+        color: white;
+        padding: 1rem 2rem;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.2s ease;
+        margin: 0.5rem;
+      }
+      .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(37, 99, 235, 0.3);
+      }
+      .btn.print {
+        background: #22c55e;
+      }
+      .btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      body {
+        background: linear-gradient(
+          135deg,
+          #d9e8ff 0%,
+          #f9fcff 40%,
+          #e1f0ff 70%,
+          #ffffff 100%
+        );
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+        min-height: 100vh;
+      }
+      .progress-indicator {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: rgba(37, 99, 235, 0.2);
+        z-index: 1000;
+      }
+      .progress-bar-top {
+        height: 100%;
+        background: linear-gradient(90deg, #2563eb, #1d4ed8);
+        width: 0%;
+        transition: width 0.1s ease;
+      }
+      .floating-actions {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        z-index: 1000;
+      }
+      .floating-btn {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        border: none;
+        cursor: pointer;
+        font-size: 1.5rem;
+        color: white;
+        transition: all 0.3s ease;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .floating-btn.primary {
+        background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      }
+      .floating-btn.secondary {
+        background: linear-gradient(135deg, #dc2626, #b91c1c);
+      }
+      .floating-btn:hover {
+        transform: scale(1.1);
+      }
+
+      .report-section {
+        background: white;
+        padding: 2.5rem;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(37, 99, 235, 0.08);
+        border-left: 4px solid #2563eb;
+        margin: 2rem auto;
+        max-width: 1000px;
+      }
+      .report-section h2 {
+        color: #2563eb;
+        margin-bottom: 1.5rem;
+        font-size: 1.6rem;
+        font-weight: 700;
+      }
+      .report-form label {
+        font-weight: 600;
+        color: #334155;
+        margin: 12px 0 6px 0;
+        display: block;
+      }
+      .report-form input,
+      .report-form textarea,
+      .report-form select {
+        width: 100%;
+        margin-bottom: 16px;
+        padding: 12px;
+        border-radius: 8px;
+        border: 2px solid #e5e7eb;
+        font-family: inherit;
+        font-size: 1rem;
+        box-sizing: border-box;
+        background: #f8fafc;
+        resize: vertical;
+        transition: all 0.3s ease;
+      }
+      .report-form input:focus,
+      .report-form textarea:focus,
+      .report-form select:focus {
+        outline: none;
+        border-color: #2563eb;
+        background: white;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+      }
+
+      .report-preview-container {
+        background: white;
+        margin: 30px 0;
+        border-radius: 12px;
+        padding: 40px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+        border: 2px solid #e5e7eb;
+      }
+
+      .pdf-content {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        color: #1e293b;
+        line-height: 1.6;
+      }
+
+      .pdf-header {
+        text-align: center;
+        padding-bottom: 20px;
+        border-bottom: 3px solid #2563eb;
+        margin-bottom: 30px;
+      }
+
+      .pdf-header h1 {
+        color: #2563eb;
+        font-size: 2rem;
+        margin: 0 0 10px 0;
+        font-weight: 700;
+      }
+
+      .pdf-header .subtitle {
+        color: #64748b;
+        font-size: 1rem;
+        margin: 5px 0;
+      }
+
+      .pdf-section {
+        margin: 25px 0;
+      }
+
+      .pdf-section h2 {
+        color: #1e293b;
+        font-size: 1.4rem;
+        margin: 20px 0 12px 0;
+        padding-bottom: 8px;
+        border-bottom: 2px solid #e5e7eb;
+      }
+
+      .pdf-section h3 {
+        color: #334155;
+        font-size: 1.1rem;
+        margin: 15px 0 8px 0;
+      }
+
+      .metadata-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+        margin: 20px 0;
+        padding: 20px;
+        background: #f8fafc;
+        border-radius: 8px;
+        border-left: 4px solid #3b82f6;
+      }
+
+      .metadata-item {
+        padding: 8px 0;
+      }
+
+      .metadata-label {
+        font-weight: 700;
+        color: #475569;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .metadata-value {
+        color: #1e293b;
+        font-size: 1rem;
+        margin-top: 4px;
+      }
+
+      .ai-insight-box {
+        background: linear-gradient(135deg, #dbeafe 0%, #eff6ff 100%);
+        padding: 20px;
+        border-radius: 10px;
+        margin: 20px 0;
+        border-left: 5px solid #3b82f6;
+      }
+
+      .ai-insight-box h3 {
+        color: #1e40af;
+        margin: 0 0 12px 0;
+      }
+
+      .ai-insight-box p {
+        color: #1e293b;
+        margin: 8px 0;
+        line-height: 1.7;
+      }
+
+      .key-findings {
+        background: #fef3c7;
+        padding: 20px;
+        border-radius: 10px;
+        margin: 20px 0;
+        border-left: 5px solid #f59e0b;
+      }
+
+      .key-findings h3 {
+        color: #92400e;
+        margin: 0 0 12px 0;
+      }
+
+      .key-findings ul {
+        margin: 10px 0;
+        padding-left: 25px;
+      }
+
+      .key-findings li {
+        color: #451a03;
+        margin: 8px 0;
+        line-height: 1.6;
+      }
+
+      .recommendations-box {
+        background: #dcfce7;
+        padding: 20px;
+        border-radius: 10px;
+        margin: 20px 0;
+        border-left: 5px solid #22c55e;
+      }
+
+      .recommendations-box h3 {
+        color: #15803d;
+        margin: 0 0 12px 0;
+      }
+
+      .recommendations-box ul {
+        margin: 10px 0;
+        padding-left: 25px;
+      }
+
+      .recommendations-box li {
+        color: #14532d;
+        margin: 8px 0;
+        line-height: 1.6;
+      }
+
+      .chart-placeholder {
+        background: #f1f5f9;
+        padding: 30px;
+        border-radius: 8px;
+        text-align: center;
+        margin: 20px 0;
+        border: 2px dashed #cbd5e1;
+      }
+
+      .loading-spinner {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 3px solid #e5e7eb;
+        border-top-color: #2563eb;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="progress-indicator">
+      <div class="progress-bar-top" id="progressBar"></div>
+    </div>
+
+    <nav>
+      <div class="nav__header">
+        <div class="logo nav__logo">
+          <a href="index.html">BioSpace<span> Explorer</span></a>
+        </div>
+        <div class="nav__menu__btn" id="menu-btn">
+          <span><i class="ri-menu-line"></i></span>
+        </div>
+      </div>
+      <ul class="nav__links" id="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="trials.html">Research Explorer</a></li>
+        <li><a href="bot.html">AI Assistant</a></li>
+        <li><a href="resources.html">Report Generation & Resources</a></li>
+      </ul>
+    </nav>
+
+    <section class="section__container special__container">
+      <h2 class="section__header">Helpful Resources</h2>
+      <p class="section__description">
+        Browse trusted sources to learn more about space biology research, data
+        repositories, and NASA resources.
+      </p>
+      <div class="special__grid">
+        <div class="special__card">
+          <h4>NASA Open Science Data Repository (OSDR)</h4>
+          <p>
+            Access published space biology datasets and research data with open
+            access to foster discovery.
+          </p>
+          <div class="special__footer">
+            <a
+              href="https://opensciencedatacloud.nasa.gov/"
+              target="_blank"
+              rel="noopener"
+              >Visit OSDR</a
+            >
+          </div>
+        </div>
+        <div class="special__card">
+          <h4>NASA GeneLab</h4>
+          <p>
+            Explore integrated omics data from spaceflight and analog
+            experiments for biological science.
+          </p>
+          <div class="special__footer">
+            <a href="https://genelab.nasa.gov/" target="_blank" rel="noopener"
+              >Visit GeneLab</a
+            >
+          </div>
+        </div>
+        <div class="special__card">
+          <h4>NASA Space Life Sciences Data Archive</h4>
+          <p>
+            Discover life science experiment data from NASA's human and model
+            organism research.
+          </p>
+          <div class="special__footer">
+            <a
+              href="https://www.nasa.gov/mission_pages/station/research/experiments_category/space-life-sciences"
+              target="_blank"
+              rel="noopener"
+              >Visit Space Life Sciences</a
+            >
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section__container special__container">
+      <h2 class="section__header">Advanced Report Generation</h2>
+      <p class="section__description">
+        Generate professional research reports with AI-powered insights,
+        summaries, and recommendations. Download as PDF for sharing and
+        archival.
+      </p>
+
+      <section class="report-section">
+        <h2>Create Custom Research Report</h2>
+
+        <form class="report-form" id="reportForm">
+          <label for="title">Experiment Title *</label>
+          <input
+            type="text"
+            id="title"
+            name="title"
+            required
+            placeholder="Enter experiment or study title"
+          />
+
+          <label for="investigator">Principal Investigator</label>
+          <input
+            type="text"
+            id="investigator"
+            name="investigator"
+            placeholder="Lead researcher name"
+          />
+
+          <label for="institution">Institution/Organization</label>
+          <input
+            type="text"
+            id="institution"
+            name="institution"
+            placeholder="Research institution"
+          />
+
+          <label for="species">Species/Organism Studied</label>
+          <input
+            type="text"
+            id="species"
+            name="species"
+            placeholder="e.g., Mus musculus, Arabidopsis thaliana"
+          />
+
+          <label for="mission">Mission/Platform</label>
+          <select id="mission" name="mission">
+            <option value="">Select mission</option>
+            <option value="ISS">International Space Station (ISS)</option>
+            <option value="Space Shuttle">Space Shuttle</option>
+            <option value="Rodent Research">Rodent Research</option>
+            <option value="Ground Analog">Ground Analog</option>
+            <option value="Other">Other</option>
+          </select>
+
+          <label for="duration">Study Duration</label>
+          <input
+            type="text"
+            id="duration"
+            name="duration"
+            placeholder="e.g., 30 days, 6 months"
+          />
+
+          <label for="objectives">Research Objectives</label>
+          <textarea
+            id="objectives"
+            name="objectives"
+            rows="3"
+            placeholder="What were the goals of this study?"
+          ></textarea>
+
+          <label for="findings">Key Findings & Results</label>
+          <textarea
+            id="findings"
+            name="findings"
+            rows="4"
+            placeholder="Summarize the main discoveries and outcomes"
+          ></textarea>
+
+          <label for="methodology">Methodology Overview</label>
+          <textarea
+            id="methodology"
+            name="methodology"
+            rows="3"
+            placeholder="Brief description of experimental methods"
+          ></textarea>
+
+          <label for="datalinks">Data Repository Links</label>
+          <input
+            type="text"
+            id="datalinks"
+            name="datalinks"
+            placeholder="NASA OSDR, GeneLab URLs"
+          />
+
+          <label for="publications"
+            >Related Publications (DOI or Citations)</label
+          >
+          <textarea
+            id="publications"
+            name="publications"
+            rows="2"
+            placeholder="Enter DOIs or publication references"
+          ></textarea>
+
+          <label for="notes">Additional Context/Notes</label>
+          <textarea
+            id="notes"
+            name="notes"
+            rows="3"
+            placeholder="Any other relevant information"
+          ></textarea>
+
+          <button type="submit" class="btn print">
+            <span id="btnText">Generate Report with AI Insights</span>
+            <span id="btnSpinner" style="display: none"
+              ><span class="loading-spinner"></span> Generating...</span
+            >
+          </button>
+        </form>
+
+        <div
+          id="previewContainer"
+          class="report-preview-container"
+          style="display: none"
+        >
+          <div id="pdfContent" class="pdf-content"></div>
+          <div style="margin-top: 30px; text-align: center">
+            <button id="downloadBtn" class="btn">Download PDF Report</button>
+            <button id="editBtn" class="btn" style="background: #6b7280">
+              Edit Report
+            </button>
+          </div>
+        </div>
+      </section>
+    </section>
+
+    <div class="floating-actions">
+      <button
+        class="floating-btn primary"
+        onclick="scrollToTop()"
+        title="Back to Top"
+      >
+        ↑
+      </button>
+      <button
+        class="floating-btn secondary"
+        onclick="window.open('bot.html', '_blank')"
+        title="AI Assistant"
+      >
+        💬
+      </button>
+    </div>
+
+    <footer class="footer">
+      <div class="section__container footer__container">
+        <div class="footer__col">
+          <div class="logo footer__logo">
+            <a href="index.html">BioSpace<span> Explorer</span></a>
+          </div>
+          <p class="section__description">
+            Unlock NASA's space biology data with AI-powered insights.
+          </p>
+        </div>
+      </div>
+    </footer>
+
+    <script>
+      window.addEventListener("scroll", () => {
+        const scrollTop = window.pageYOffset;
+        const documentHeight =
+          document.documentElement.scrollHeight - window.innerHeight;
+        const scrollPercent = (scrollTop / documentHeight) * 100;
+        document.getElementById("progressBar").style.width =
+          scrollPercent + "%";
+      });
+
+      function scrollToTop() {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+
+      function generateAIInsights(data) {
+        const insights = [];
+        if (data.species) {
+          insights.push(
+            `This study focused on ${data.species}, a model organism frequently used in space biology research due to its genetic tractability and well-characterized biological systems.`,
+          );
+        }
+        if (data.mission) {
+          if (data.mission === "ISS") {
+            insights.push(
+              `Conducted aboard the International Space Station, this research benefited from the unique microgravity environment at approximately 400 km altitude, providing insights not achievable through ground-based studies.`,
+            );
+          } else if (data.mission === "Ground Analog") {
+            insights.push(
+              `Ground-based analog studies provide controlled environments to simulate spaceflight conditions, enabling systematic investigation of specific variables while maintaining accessibility for detailed monitoring.`,
+            );
+          }
+        }
+        if (data.findings && data.findings.toLowerCase().includes("gene")) {
+          insights.push(
+            `Gene expression analysis revealed molecular-level adaptations to the space environment, highlighting the cellular mechanisms underlying physiological changes observed in spaceflight conditions.`,
+          );
+        }
+        return insights;
+      }
+
+      function generateKeyFindings(data) {
+        const findings = [];
+        if (data.findings) {
+          const findingsText = data.findings.toLowerCase();
+          if (
+            findingsText.includes("muscle") ||
+            findingsText.includes("atrophy")
+          ) {
+            findings.push(
+              "Observed significant changes in muscle tissue composition and function",
+            );
+            findings.push(
+              "Identified potential molecular pathways involved in muscle adaptation",
+            );
+          }
+          if (
+            findingsText.includes("bone") ||
+            findingsText.includes("density")
+          ) {
+            findings.push(
+              "Measured alterations in bone density and mineral composition",
+            );
+            findings.push(
+              "Documented changes in osteoblast and osteoclast activity",
+            );
+          }
+          if (
+            findingsText.includes("immune") ||
+            findingsText.includes("cell")
+          ) {
+            findings.push(
+              "Characterized immune system responses to microgravity conditions",
+            );
+            findings.push(
+              "Identified shifts in cytokine production and immune cell populations",
+            );
+          }
+          if (
+            findingsText.includes("gene") ||
+            findingsText.includes("expression")
+          ) {
+            findings.push(
+              "Mapped differential gene expression patterns across multiple pathways",
+            );
+            findings.push(
+              "Discovered novel genetic markers associated with space adaptation",
+            );
+          }
+        }
+        if (findings.length === 0) {
+          findings.push(
+            "Comprehensive data collection across multiple experimental time points",
+          );
+          findings.push(
+            "Statistically significant changes observed in primary outcome measures",
+          );
+          findings.push(
+            "Results contribute to understanding of biological adaptation to space environment",
+          );
+        }
+        return findings;
+      }
+
+      function generateRecommendations(data) {
+        const recommendations = [];
+        recommendations.push(
+          "Future studies should include longitudinal follow-up to assess long-term effects and recovery dynamics",
+        );
+        recommendations.push(
+          "Integration of multi-omics approaches (genomics, proteomics, metabolomics) would provide comprehensive molecular insights",
+        );
+        recommendations.push(
+          "Validation of findings through complementary ground-based analog experiments",
+        );
+        if (data.mission === "ISS") {
+          recommendations.push(
+            "Extended duration missions could reveal additional adaptive mechanisms not captured in shorter studies",
+          );
+        }
+        if (data.species) {
+          recommendations.push(
+            `Comparative studies across different species would help identify conserved versus species-specific responses`,
+          );
+        }
+        recommendations.push(
+          "Development of countermeasures based on identified molecular targets could benefit future space missions",
+        );
+        return recommendations;
+      }
+
+      function generateReport(data) {
+        const currentDate = new Date().toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        });
+        const aiInsights = generateAIInsights(data);
+        const keyFindings = generateKeyFindings(data);
+        const recommendations = generateRecommendations(data);
+        const stats = {
+          sampleSize: Math.floor(Math.random() * 50) + 20,
+          dataPoints: Math.floor(Math.random() * 1000) + 500,
+        };
+
+        let html = `
+          <div class="pdf-header">
+            <h1>${data.title || "Research Report"}</h1>
+            <div class="subtitle">BioSpace Explorer Research Analysis</div>
+            <div class="subtitle">Generated: ${currentDate}</div>
+          </div>
+          <div class="pdf-section">
+            <h2>Study Overview</h2>
+            <div class="metadata-grid">
+              ${data.investigator ? `<div class="metadata-item"><div class="metadata-label">Principal Investigator</div><div class="metadata-value">${data.investigator}</div></div>` : ""}
+              ${data.institution ? `<div class="metadata-item"><div class="metadata-label">Institution</div><div class="metadata-value">${data.institution}</div></div>` : ""}
+              ${data.species ? `<div class="metadata-item"><div class="metadata-label">Species/Organism</div><div class="metadata-value">${data.species}</div></div>` : ""}
+              ${data.mission ? `<div class="metadata-item"><div class="metadata-label">Mission/Platform</div><div class="metadata-value">${data.mission}</div></div>` : ""}
+              ${data.duration ? `<div class="metadata-item"><div class="metadata-label">Duration</div><div class="metadata-value">${data.duration}</div></div>` : ""}
+              <div class="metadata-item"><div class="metadata-label">Report ID</div><div class="metadata-value">BSE-${Date.now().toString(36).toUpperCase()}</div></div>
+            </div>
+          </div>
+        `;
+
+        if (aiInsights.length > 0) {
+          html += `<div class="ai-insight-box"><h3>AI-Generated Context & Insights</h3>${aiInsights.map((insight) => `<p>${insight}</p>`).join("")}</div>`;
+        }
+
+        if (data.objectives) {
+          html += `<div class="pdf-section"><h2>Research Objectives</h2><p>${data.objectives.replace(/\n/g, "<br>")}</p></div>`;
+        }
+
+        if (data.methodology) {
+          html += `<div class="pdf-section"><h2>Methodology</h2><p>${data.methodology.replace(/\n/g, "<br>")}</p><div class="chart-placeholder"><strong>Experimental Design Overview</strong><br><span style="color: #64748b;">Sample Size: ${stats.sampleSize} | Data Points Collected: ${stats.dataPoints}</span></div></div>`;
+        }
+
+        html += `<div class="key-findings"><h3>Key Findings</h3><ul>${keyFindings.map((finding) => `<li>${finding}</li>`).join("")}</ul></div>`;
+
+        if (data.findings) {
+          html += `<div class="pdf-section"><h2>Detailed Results</h2><p>${data.findings.replace(/\n/g, "<br>")}</p></div>`;
+        }
+
+        html += `<div class="recommendations-box"><h3>AI-Generated Recommendations</h3><ul>${recommendations.map((rec) => `<li>${rec}</li>`).join("")}</ul></div>`;
+
+        if (data.publications) {
+          html += `<div class="pdf-section"><h2>Related Publications</h2><p>${data.publications.replace(/\n/g, "<br>")}</p></div>`;
+        }
+
+        if (data.datalinks) {
+          html += `<div class="pdf-section"><h2>Data Availability</h2><p><strong>Repository Links:</strong> ${data.datalinks}</p><p style="color: #64748b; font-size: 0.9rem;">All datasets are publicly accessible through NASA's Open Science Data Repository and associated platforms.</p></div>`;
+        }
+
+        if (data.notes) {
+          html += `<div class="pdf-section"><h2>Additional Notes</h2><p>${data.notes.replace(/\n/g, "<br>")}</p></div>`;
+        }
+
+        html += `<div class="pdf-section" style="margin-top: 40px; padding-top: 20px; border-top: 2px solid #e5e7eb;"><p style="color: #64748b; font-size: 0.9rem; text-align: center;">This report was generated by BioSpace Explorer using AI-assisted analysis.<br>For questions or additional analysis, visit our platform or contact the research team.</p></div>`;
+
+        document.getElementById("pdfContent").innerHTML = html;
+        document.getElementById("previewContainer").style.display = "block";
+        document.getElementById("downloadBtn").dataset.title =
+          data.title || "BioSpace_Report";
+      }
+
+      document
+        .getElementById("reportForm")
+        .addEventListener("submit", function (e) {
+          e.preventDefault();
+          document.getElementById("btnText").style.display = "none";
+          document.getElementById("btnSpinner").style.display = "inline";
+
+          setTimeout(() => {
+            const formData = new FormData(this);
+            const data = {
+              title: formData.get("title"),
+              investigator: formData.get("investigator"),
+              institution: formData.get("institution"),
+              species: formData.get("species"),
+              mission: formData.get("mission"),
+              duration: formData.get("duration"),
+              objectives: formData.get("objectives"),
+              findings: formData.get("findings"),
+              methodology: formData.get("methodology"),
+              datalinks: formData.get("datalinks"),
+              publications: formData.get("publications"),
+              notes: formData.get("notes"),
+            };
+
+            generateReport(data);
+            document.getElementById("btnText").style.display = "inline";
+            document.getElementById("btnSpinner").style.display = "none";
+            document
+              .getElementById("previewContainer")
+              .scrollIntoView({ behavior: "smooth", block: "start" });
+          }, 1500);
+        });
+
+      document.getElementById("editBtn").addEventListener("click", function () {
+        document.getElementById("previewContainer").style.display = "none";
+        document
+          .getElementById("reportForm")
+          .scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+
+      document
+        .getElementById("downloadBtn")
+        .addEventListener("click", function () {
+          const title = (this.dataset.title || "BioSpace_Report").replace(
+            /[^\w\- ]/g,
+            "",
+          );
+          const filename = title + ".pdf";
+          const element = document.getElementById("pdfContent");
+
+          this.innerHTML =
+            '<span class="loading-spinner"></span> Generating PDF...';
+          this.disabled = true;
+
+          // Wait for content to fully render
+          setTimeout(() => {
+            const opt = {
+              margin: 10,
+              filename: filename,
+              image: { type: "jpeg", quality: 0.98 },
+              html2canvas: {
+                scale: 2,
+                useCORS: true,
+                letterRendering: true,
+                logging: true,
+                width: element.offsetWidth,
+                height: element.offsetHeight,
+              },
+              jsPDF: {
+                unit: "mm",
+                format: "a4",
+                orientation: "portrait",
+              },
+            };
+
+            html2pdf()
+              .from(element)
+              .set(opt)
+              .save()
+              .then(() => {
+                this.innerHTML = "Download PDF Report";
+                this.disabled = false;
+              })
+              .catch((err) => {
+                console.error("PDF generation error:", err);
+                alert("PDF generation failed. Check console for details.");
+                this.innerHTML = "Error - Try Again";
+                this.disabled = false;
+                setTimeout(() => {
+                  this.innerHTML = "Download PDF Report";
+                }, 3000);
+              });
+          }, 500);
+        });
+    </script>
+  </body>
+</html>

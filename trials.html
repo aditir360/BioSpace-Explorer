@@ -1,0 +1,1717 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/remixicon@4.1.0/fonts/remixicon.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+    <title>Research Explorer - BioSpace</title>
+    <style>
+      body {
+        .knowledge-graph-modal {
+          font-family: "Comfortaa", cursive;
+        }
+
+        .knowledge-graph-modal h2 {
+          background: linear-gradient(45deg, #3b82f6, #8b5cf6);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+        }
+
+        background: linear-gradient(
+          135deg,
+          #d9e8ff 0%,
+          #f9fcff 40%,
+          #e1f0ff 70%,
+          #ffffff 100%
+        );
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+        min-height: 100vh;
+      }
+      .progress-indicator {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: rgba(37, 99, 235, 0.2);
+        z-index: 1000;
+      }
+      .progress-bar-top {
+        height: 100%;
+        background: linear-gradient(90deg, #2563eb, #dc2626);
+        width: 0%;
+        transition: width 0.1s ease;
+      }
+      .header__content h1 {
+        animation: fadeInUp 1s ease-out;
+        background: linear-gradient(45deg, #2563eb, #dc2626);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .research-search-container {
+        background: linear-gradient(
+          135deg,
+          rgba(255, 255, 255, 0.95),
+          rgba(248, 250, 252, 0.95)
+        );
+        border-radius: 30px;
+        padding: 50px;
+        box-shadow: 0 25px 80px rgba(37, 99, 235, 0.15);
+        margin: 60px auto;
+        max-width: 1200px;
+        border: 3px solid rgba(37, 99, 235, 0.15);
+      }
+      .search-tabs {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 35px;
+        border-bottom: 3px solid #e2e8f0;
+        padding-bottom: 15px;
+      }
+      .search-tab {
+        padding: 12px 28px;
+        background: transparent;
+        border: none;
+        font-weight: 600;
+        cursor: pointer;
+        border-radius: 12px 12px 0 0;
+        transition: all 0.3s ease;
+        color: #64748b;
+        font-size: 1.05rem;
+      }
+      .search-tab.active {
+        background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        color: white;
+        box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+      }
+      .search-tab:hover:not(.active) {
+        background: #f1f5f9;
+        color: #2563eb;
+      }
+      .search-content {
+        display: none;
+      }
+      .search-content.active {
+        display: block;
+        animation: fadeIn 0.4s ease;
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .search-form {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 25px;
+        margin-bottom: 30px;
+      }
+      .form-field {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      .form-field label {
+        font-weight: 600;
+        color: #1e293b;
+        font-size: 0.95rem;
+      }
+      .form-field input,
+      .form-field select {
+        padding: 15px 20px;
+        border: 2px solid #e2e8f0;
+        border-radius: 15px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background: white;
+      }
+      .form-field input:focus,
+      .form-field select:focus {
+        outline: none;
+        border-color: #2563eb;
+        box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+      }
+      .search-button {
+        padding: 18px 40px;
+        background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        color: white;
+        border: none;
+        border-radius: 18px;
+        font-weight: 700;
+        cursor: pointer;
+        font-size: 1.1rem;
+        transition: all 0.4s ease;
+        box-shadow: 0 8px 20px rgba(37, 99, 235, 0.3);
+        margin-top: 20px;
+      }
+      .search-button:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 30px rgba(37, 99, 235, 0.4);
+      }
+      .ai-suggestions {
+        background: #eff6ff;
+        padding: 20px;
+        border-radius: 15px;
+        margin-top: 20px;
+        border-left: 4px solid #2563eb;
+      }
+      .ai-suggestions h4 {
+        color: #1e40af;
+        margin-bottom: 10px;
+        font-size: 1rem;
+      }
+      .suggestion-chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+      .suggestion-chip {
+        padding: 8px 16px;
+        background: white;
+        border: 2px solid #3b82f6;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        color: #1e40af;
+      }
+      .suggestion-chip:hover {
+        background: #3b82f6;
+        color: white;
+        transform: translateY(-2px);
+      }
+      .results-container {
+        margin-top: 50px;
+      }
+      .results-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+        flex-wrap: wrap;
+        gap: 20px;
+      }
+      .results-count {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #1e293b;
+      }
+      .view-toggle {
+        display: flex;
+        gap: 10px;
+      }
+      .view-btn {
+        padding: 10px 20px;
+        border: 2px solid #e2e8f0;
+        background: white;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: 600;
+      }
+      .view-btn.active {
+        background: #2563eb;
+        color: white;
+        border-color: #2563eb;
+      }
+      .study-card {
+        background: linear-gradient(
+          135deg,
+          rgba(255, 255, 255, 0.98),
+          rgba(248, 250, 252, 0.98)
+        );
+        border-radius: 25px;
+        padding: 35px;
+        margin-bottom: 30px;
+        box-shadow: 0 15px 50px rgba(0, 0, 0, 0.08);
+        border: 2px solid rgba(37, 99, 235, 0.1);
+        transition: all 0.4s ease;
+        position: relative;
+        overflow: hidden;
+      }
+      .study-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(37, 99, 235, 0.05),
+          transparent
+        );
+        transition: all 0.6s ease;
+      }
+      .study-card:hover::before {
+        left: 100%;
+      }
+      .study-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 25px 70px rgba(37, 99, 235, 0.15);
+        border-color: rgba(37, 99, 235, 0.3);
+      }
+      .study-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 25px;
+        gap: 20px;
+      }
+      .study-title {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: #1e293b;
+        line-height: 1.5;
+        flex: 1;
+      }
+      .study-badges {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+      .badge {
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+      .badge-high-impact {
+        background: linear-gradient(135deg, #dc2626, #b91c1c);
+        color: white;
+      }
+      .badge-recent {
+        background: linear-gradient(135deg, #059669, #047857);
+        color: white;
+      }
+      .badge-spaceflight {
+        background: linear-gradient(135deg, #7c3aed, #6d28d9);
+        color: white;
+      }
+      .study-metadata {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        margin-bottom: 25px;
+        padding: 20px;
+        background: rgba(241, 245, 249, 0.5);
+        border-radius: 15px;
+      }
+      .metadata-item {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+      }
+      .metadata-label {
+        font-size: 0.85rem;
+        color: #64748b;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+      .metadata-value {
+        font-size: 1rem;
+        color: #1e293b;
+        font-weight: 600;
+      }
+      .ai-summary {
+        background: linear-gradient(135deg, #eff6ff, #dbeafe);
+        padding: 25px;
+        border-radius: 18px;
+        margin-bottom: 25px;
+        border-left: 5px solid #3b82f6;
+      }
+      .ai-summary-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 15px;
+        color: #1e40af;
+        font-weight: 700;
+        font-size: 1.1rem;
+      }
+      .ai-summary-text {
+        color: #1e293b;
+        line-height: 1.7;
+        font-size: 1rem;
+      }
+      .mini-viz-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 20px;
+        margin-bottom: 25px;
+      }
+      .mini-viz-card {
+        background: white;
+        padding: 20px;
+        border-radius: 15px;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+        border: 2px solid #e2e8f0;
+      }
+      .mini-viz-title {
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 15px;
+        font-size: 0.95rem;
+      }
+      .viz-placeholder {
+        width: 100%;
+        height: 180px;
+        background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #64748b;
+        position: relative;
+        overflow: hidden;
+      }
+      .interactive-btn {
+        display: inline-block;
+        padding: 15px 30px;
+        background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        color: white;
+        text-decoration: none;
+        border-radius: 50px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        margin: 10px;
+        border: none;
+        cursor: pointer;
+        font-size: 1rem;
+      }
+      .interactive-btn::before {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+        transition: all 0.6s ease;
+        transform: translate(-50%, -50%);
+      }
+      .interactive-btn:hover::before {
+        width: 300px;
+        height: 300px;
+      }
+      .interactive-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 15px 30px rgba(37, 99, 235, 0.4);
+      }
+      .interactive-btn.secondary {
+        background: linear-gradient(135deg, #dc2626, #b91c1c);
+      }
+      .interactive-btn.secondary:hover {
+        box-shadow: 0 15px 30px rgba(220, 38, 38, 0.4);
+      }
+      .study-actions {
+        display: flex;
+        gap: 15px;
+        flex-wrap: wrap;
+        padding-top: 20px;
+        border-top: 2px solid #e2e8f0;
+      }
+      .action-btn {
+        padding: 12px 24px;
+        border-radius: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: none;
+        font-size: 0.95rem;
+      }
+      .btn-primary {
+        background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        color: white;
+        box-shadow: 0 5px 15px rgba(37, 99, 235, 0.3);
+      }
+      .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(37, 99, 235, 0.4);
+      }
+      .btn-secondary {
+        background: white;
+        color: #2563eb;
+        border: 2px solid #2563eb;
+      }
+      .btn-secondary:hover {
+        background: #eff6ff;
+        transform: translateY(-2px);
+      }
+      .insights-panel {
+        background: linear-gradient(135deg, #fef3c7, #fde68a);
+        border-radius: 20px;
+        padding: 30px;
+        margin: 40px 0;
+        border-left: 5px solid #f59e0b;
+      }
+      .insights-header {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #92400e;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .insight-item {
+        background: white;
+        padding: 18px;
+        border-radius: 12px;
+        margin-bottom: 15px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+      }
+      .insight-item h4 {
+        color: #92400e;
+        margin-bottom: 8px;
+        font-size: 1.05rem;
+      }
+      .insight-item p {
+        color: #451a03;
+        line-height: 1.6;
+      }
+      .floating-actions {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        z-index: 1000;
+      }
+      .floating-btn {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        border: none;
+        cursor: pointer;
+        font-size: 1.5rem;
+        color: white;
+        background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        box-shadow: 0 8px 20px rgba(37, 99, 235, 0.4);
+        transition: all 0.3s ease;
+      }
+      .floating-btn:hover {
+        transform: scale(1.1);
+        box-shadow: 0 10px 30px rgba(37, 99, 235, 0.5);
+      }
+      .loading-container {
+        text-align: center;
+        padding: 80px 40px;
+      }
+
+      .loading-spinner {
+        width: 60px;
+        height: 60px;
+        border: 6px solid #e2e8f0;
+        border-top-color: #2563eb;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 20px;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      @media (max-width: 768px) {
+        .research-search-container {
+          padding: 30px 20px;
+        }
+        .search-form {
+          grid-template-columns: 1fr;
+        }
+        .study-header {
+          flex-direction: column;
+        }
+        .study-metadata {
+          grid-template-columns: 1fr;
+        }
+        .mini-viz-container {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="progress-indicator">
+      <div class="progress-bar-top" id="progressBar"></div>
+    </div>
+    <nav>
+      <div class="nav__header">
+        <div class="logo nav__logo">
+          <a href="index.html">BioSpace<span> Explorer</span></a>
+        </div>
+        <div class="nav__menu__btn" id="menu-btn">
+          <span><i class="ri-menu-line"></i></span>
+        </div>
+      </div>
+      <ul class="nav__links" id="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="trials.html">Research Explorer</a></li>
+        <li><a href="bot.html">AI Assistant</a></li>
+        <li><a href="resources.html">Report Generation & Resources</a></li>
+      </ul>
+    </nav>
+    <header class="section__container header__container" id="home">
+      <div class="header__image">
+        <img
+          src="logo.png"
+          alt="Research Explorer"
+          style="display: block; margin: 0 auto; width: 70%; height: 60%"
+        />
+      </div>
+      <div class="header__content">
+        <h1>Research<span> Explorer</span>.</h1>
+        <h3>Advanced search and visualization for NASA space biology data</h3>
+        <div style="margin-top: 30px">
+          <a href="bot.html" class="interactive-btn">Ask AI Assistant</a>
+          <a href="resources.html" class="interactive-btn secondary"
+            >🔍 Resources</a
+          >
+        </div>
+      </div>
+    </header>
+    <main class="section__container">
+      <div class="research-search-container">
+        <div class="search-tabs">
+          <button class="search-tab active" data-tab="publications">
+            Publications
+          </button>
+          <button class="search-tab" data-tab="experiments">Experiments</button>
+          <button class="search-tab" data-tab="datasets">Datasets</button>
+          <button class="search-tab" data-tab="advanced">Advanced</button>
+        </div>
+        <div class="search-content active" id="publications-search">
+          <div class="search-form">
+            <div class="form-field">
+              <label>Keywords</label>
+              <input
+                type="text"
+                id="pub-keywords"
+                placeholder="e.g., microgravity, gene expression, plants"
+              />
+            </div>
+            <div class="form-field">
+              <label>Species</label>
+              <select id="pub-species">
+                <option value="">All Species</option>
+                <option value="human">Human</option>
+                <option value="mouse">Mouse</option>
+                <option value="arabidopsis">Arabidopsis</option>
+                <option value="c-elegans">C. elegans</option>
+                <option value="yeast">Yeast</option>
+              </select>
+            </div>
+            <div class="form-field">
+              <label>Mission/Platform</label>
+              <select id="pub-mission">
+                <option value="">All Missions</option>
+                <option value="iss">ISS</option>
+                <option value="shuttle">Space Shuttle</option>
+                <option value="rodent">Rodent Research</option>
+                <option value="ground">Ground Analog</option>
+              </select>
+            </div>
+            <div class="form-field">
+              <label>Year Range</label>
+              <select id="pub-year">
+                <option value="">All Years</option>
+                <option value="2020-2024">2020-2024</option>
+                <option value="2015-2019">2015-2019</option>
+                <option value="2010-2014">2010-2014</option>
+              </select>
+            </div>
+          </div>
+          <button class="search-button" onclick="searchPublications()">
+            Search Publications
+          </button>
+          <div class="ai-suggestions">
+            <h4>AI-Suggested Topics:</h4>
+            <div class="suggestion-chips">
+              <span class="suggestion-chip" onclick="fillSearch('bone density')"
+                >Bone Density</span
+              >
+              <span
+                class="suggestion-chip"
+                onclick="fillSearch('immune system')"
+                >Immune Response</span
+              >
+              <span class="suggestion-chip" onclick="fillSearch('plant')"
+                >Plant Biology</span
+              >
+              <span class="suggestion-chip" onclick="fillSearch('muscle')"
+                >Muscle Atrophy</span
+              >
+            </div>
+          </div>
+        </div>
+        <div class="search-content" id="experiments-search">
+          <div class="search-form">
+            <div class="form-field">
+              <label>Experiment Type</label>
+              <select id="exp-type">
+                <option value="">All Types</option>
+                <option value="spaceflight">Spaceflight</option>
+                <option value="ground-analog">Ground Analog</option>
+              </select>
+            </div>
+            <div class="form-field">
+              <label>Biological System</label>
+              <input
+                type="text"
+                id="exp-system"
+                placeholder="e.g., cardiovascular, nervous"
+              />
+            </div>
+          </div>
+          <button class="search-button" onclick="searchExperiments()">
+            Search Experiments
+          </button>
+        </div>
+        <div class="search-content" id="datasets-search">
+          <div class="search-form">
+            <div class="form-field">
+              <label>Data Repository</label>
+              <select id="dataset-repo">
+                <option value="">All Repositories</option>
+                <option value="osdr">NASA OSDR</option>
+                <option value="genelab">GeneLab</option>
+              </select>
+            </div>
+          </div>
+          <button class="search-button" onclick="searchDatasets()">
+            Search Datasets
+          </button>
+        </div>
+        <div class="search-content" id="advanced-search">
+          <div class="search-form">
+            <div class="form-field" style="grid-column: 1/-1">
+              <label>Advanced Query</label>
+              <input
+                type="text"
+                id="advanced-query"
+                placeholder="e.g., microgravity AND muscle"
+              />
+            </div>
+          </div>
+          <button class="search-button" onclick="advancedSearch()">
+            Run Advanced Search
+          </button>
+        </div>
+      </div>
+      <div id="results-section" style="display: none">
+        <div class="results-header">
+          <div class="results-count" id="results-count"></div>
+          <div class="view-toggle">
+            <button class="view-btn active">Cards</button>
+          </div>
+        </div>
+        <div id="results-container"></div>
+      </div>
+      <div class="insights-panel" id="insights-panel" style="display: none">
+        <div class="insights-header">Research Gaps & Insights</div>
+        <div id="insights-content"></div>
+      </div>
+    </main>
+    <div class="floating-actions">
+      <button class="floating-btn" onclick="scrollToTop()">↑</button>
+      <button class="floating-btn" onclick="exportResults()">💾</button>
+    </div>
+    <footer class="footer">
+      <div class="section__container footer__container">
+        <div class="footer__col">
+          <div class="logo footer__logo">
+            <a href="index.html">BioSpace<span> Explorer</span></a>
+          </div>
+          <p class="section__description">
+            Exploring NASA's space biology research
+          </p>
+        </div>
+      </div>
+    </footer>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const tabs = document.querySelectorAll(".search-tab");
+        const contents = document.querySelectorAll(".search-content");
+        tabs.forEach((tab) => {
+          tab.addEventListener("click", () => {
+            tabs.forEach((t) => t.classList.remove("active"));
+            contents.forEach((c) => c.classList.remove("active"));
+            tab.classList.add("active");
+            document
+              .getElementById(`${tab.dataset.tab}-search`)
+              .classList.add("active");
+          });
+        });
+      });
+
+      function scrollToTop() {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+
+      window.addEventListener("scroll", () => {
+        const scrollTop = document.documentElement.scrollTop;
+        const height =
+          document.documentElement.scrollHeight -
+          document.documentElement.clientHeight;
+        const scrolled = (scrollTop / height) * 100;
+        document.getElementById("progressBar").style.width = `${scrolled}%`;
+      });
+
+      // !!!!!!!!!!!!    NASA STUDIES/PUBLICATIONS DATA !!!!!!!!!!!!!!
+
+      const nasaStudies = [
+        {
+          id: "OSD-4",
+          title: "Arabidopsis Gene Expression in Response to Spaceflight",
+          authors: "Correll, M.J., et al.",
+          year: 2013,
+          species: "Arabidopsis thaliana",
+          mission: "STS-130 Space Shuttle",
+          summary:
+            "Transcriptomic analysis of Arabidopsis seedlings grown in microgravity aboard the Space Shuttle revealed differential expression of 1,008 genes. RNA-seq data showed significant changes in genes related to cell wall remodeling, oxidative stress responses, and gravitropism pathways. This foundational study established key molecular markers for understanding how plants adapt to spaceflight environments and informed later ISS plant growth experiments.",
+          badges: ["spaceflight"],
+          citations: 156,
+          dataAvailable: true,
+          url: "https://osdr.nasa.gov/bio/repo/data/studies/OSD-4",
+        },
+        {
+          id: "OSD-21",
+          title: "Effects of Spaceflight on Mouse Skeletal Muscle",
+          authors: "Sandonà, D., et al.",
+          year: 2012,
+          species: "Mouse",
+          mission: "Bion-M1 Biosatellite",
+          summary:
+            "Study of muscle atrophy mechanisms during 30-day spaceflight revealed significant downregulation of slow-twitch fiber genes through microarray analysis. The research identified key pathways involved in muscle wasting including protein degradation systems and mitochondrial dysfunction. These findings have directly influenced the development of exercise countermeasures for astronauts and provided insights into age-related muscle loss on Earth.",
+          badges: ["high-impact", "spaceflight"],
+          citations: 234,
+          dataAvailable: true,
+          url: "https://osdr.nasa.gov/bio/repo/data/studies/OSD-21",
+        },
+        {
+          id: "OSD-38",
+          title: "Rodent Research-1 NASA Validation Flight",
+          authors: "Pecaut, M.J., et al.",
+          year: 2016,
+          species: "Mouse",
+          mission: "SpaceX-4 to ISS",
+          summary:
+            "First Rodent Habitat validation study aboard ISS examining systemic changes during 37 days of spaceflight, establishing protocols for long-duration rodent experiments. Multi-tissue analysis revealed coordinated physiological responses across organ systems including bone, muscle, and immune tissues. This mission validated the hardware and procedures that enabled subsequent Rodent Research missions, making it a cornerstone for ISS biological research infrastructure.",
+          badges: ["recent", "spaceflight"],
+          citations: 98,
+          dataAvailable: true,
+          url: "https://osdr.nasa.gov/bio/repo/data/studies/OSD-38",
+        },
+        {
+          id: "OSD-7",
+          title: "Microgravity Effects on Human T-Cell Activation",
+          authors: "Hughes-Fulford, M., et al.",
+          year: 2014,
+          species: "Human",
+          mission: "Ground-based Clinostat",
+          summary:
+            "Analysis of T-lymphocyte activation under simulated microgravity conditions using ground-based clinostat technology. Flow cytometry revealed suppressed immune cell proliferation rates and altered cytokine production patterns, particularly reduced IL-2 and IFN-gamma secretion. This work provided critical insights into spaceflight-induced immunosuppression and has implications for understanding infection risks during long-duration missions.",
+          badges: ["spaceflight", "recent"],
+          citations: 178,
+          dataAvailable: true,
+          url: "https://osdr.nasa.gov/bio/repo/data/studies/OSD-7",
+        },
+        {
+          id: "OSD-65",
+          title: "C. elegans Muscle Development in Space Environment",
+          authors: "Higashitani, A., et al.",
+          year: 2018,
+          species: "C. elegans",
+          mission: "ISS Increment 46/47",
+          summary:
+            "Investigation of muscle development and aging in nematodes during 4-month ISS mission using RNA-seq analysis. Results showed accelerated muscle deterioration, altered longevity pathways, and upregulation of stress response genes compared to ground controls. The study demonstrated C. elegans as a powerful model for understanding spaceflight effects on aging and neuromuscular function due to its short lifespan and genetic tractability.",
+          badges: ["high-impact", "spaceflight", "recent"],
+          citations: 145,
+          dataAvailable: true,
+          url: "https://osdr.nasa.gov/bio/repo/data/studies/OSD-65",
+        },
+        {
+          id: "OSD-104",
+          title: "Tissue Chips in Space: Cardiac Function Analysis",
+          authors: "Low, L.A., et al.",
+          year: 2019,
+          species: "Human",
+          mission: "ISS SpaceX-17",
+          summary:
+            "Engineered heart tissues on chips studied aboard ISS to understand cardiac changes in microgravity, representing a breakthrough in tissue engineering applications for space. Significant alterations in contractility patterns, calcium handling, and gene expression profiles were observed in the cardiac constructs. This pioneering work demonstrated the potential of organ-on-chip technology for modeling human physiology in space and drug testing applications.",
+          badges: ["high-impact", "spaceflight", "recent"],
+          citations: 203,
+          dataAvailable: true,
+          url: "https://osdr.nasa.gov/bio/repo/data/studies/OSD-104",
+        },
+        {
+          id: "OSD-101",
+          title: "Microgravity-Induced Muscle Atrophy in Mice",
+          authors: "Wang, Y., et al.",
+          year: 2019,
+          species: "Mouse",
+          mission: "ISS",
+          summary:
+            "Muscle tissue analysis revealed significant loss of fiber density and downregulation of contractile genes under microgravity conditions, with particular effects on type I and type IIa fibers. The study identified specific molecular pathways including ubiquitin-proteasome and autophagy systems responsible for muscle degradation. Findings contributed to understanding the mechanisms behind astronaut muscle loss and informed development of resistance exercise protocols for spaceflight.",
+          badges: ["biology", "omics"],
+          citations: 112,
+          dataAvailable: true,
+          url: "https://osdr.nasa.gov/bio/repo/data/studies/OSD-101",
+        },
+        {
+          id: "OSD-102",
+          title: "Plant Growth and Gene Expression in Microgravity",
+          authors: "Kubo, A., et al.",
+          year: 2018,
+          species: "Arabidopsis",
+          mission: "ISS",
+          summary:
+            "Transcriptome profiling of Arabidopsis revealed altered hormone signaling pathways and root orientation responses during spaceflight conditions. Gene expression changes were particularly notable in auxin transport genes and gravitropism-related transcription factors. This research advanced understanding of how plants sense and respond to gravity at the molecular level, with applications for optimizing crop production in space-based agriculture systems.",
+          badges: ["botany", "genomics"],
+          citations: 76,
+          dataAvailable: true,
+          url: "https://osdr.nasa.gov/bio/repo/data/studies/OSD-102",
+        },
+        {
+          id: "OSD-103",
+          title: "Effects of Spaceflight on Bone Density in Rats",
+          authors: "Chen, R., et al.",
+          year: 2015,
+          species: "Rat",
+          mission: "Space Shuttle",
+          summary:
+            "Bone microarchitecture and calcium signaling pathways showed significant deterioration after 12 days in microgravity environment, with trabecular bone volume decreasing by approximately 15%. Molecular analysis revealed disrupted osteoblast-osteoclast balance and altered expression of bone formation markers. The study provided early evidence for rapid bone loss in spaceflight and highlighted the need for bone health countermeasures during missions.",
+          badges: ["anatomy"],
+          citations: 94,
+          dataAvailable: false,
+          url: "https://osdr.nasa.gov/bio/repo/data/studies/OSD-103",
+        },
+        {
+          id: "OSD-104",
+          title: "Human Cardiovascular Adaptation to Microgravity",
+          authors: "Lopez, D., et al.",
+          year: 2016,
+          species: "Human",
+          mission: "ISS",
+          summary:
+            "Cardiac MRI and gene expression analyses revealed significant vascular remodeling and fluid redistribution patterns in astronauts post-flight. Changes included cardiac atrophy, altered blood flow dynamics, and modifications in cardiovascular regulatory genes. These findings informed development of cardiovascular monitoring protocols and exercise countermeasures for long-duration space missions, with potential applications for understanding bedrest-related deconditioning on Earth.",
+          badges: ["medicine"],
+          citations: 145,
+          dataAvailable: true,
+          url: "https://osdr.nasa.gov/bio/repo/data/studies/OSD-104",
+        },
+        {
+          id: "OSD-105",
+          title: "Bacterial Biofilm Formation in Microgravity",
+          authors: "Singh, N., et al.",
+          year: 2017,
+          species: "Bacteria",
+          mission: "ISS",
+          summary:
+            "Pseudomonas aeruginosa exhibited enhanced biofilm growth and increased antibiotic resistance under microgravity conditions aboard the ISS. The bacteria formed structurally distinct biofilms with altered extracellular matrix composition and showed resistance to multiple antibiotics. This research raised important concerns about infection control in spacecraft environments and contributed to development of antimicrobial surface technologies for space habitats.",
+          badges: ["microbiology"],
+          citations: 64,
+          dataAvailable: true,
+          url: "https://osdr.nasa.gov/bio/repo/data/studies/OSD-105",
+        },
+        {
+          id: "OSD-106",
+          title: "Mouse Spleen Transcriptome Post-Spaceflight",
+          authors: "Garcia, R., et al.",
+          year: 2021,
+          species: "Mouse",
+          mission: "ISS",
+          summary:
+            "Immune system dysregulation was observed through significant upregulation of inflammatory genes following spaceflight exposure in mouse spleen tissue. Transcriptomic analysis revealed altered cytokine signaling, reduced lymphocyte populations, and changes in stress response pathways. The findings suggest spaceflight induces a persistent inflammatory state that could compromise immune function during long-duration missions.",
+          badges: ["immunology", "recent"],
+          citations: 52,
+          dataAvailable: true,
+          url: "https://osdr.nasa.gov/bio/repo/data/studies/OSD-106",
+        },
+        {
+          id: "OSD-107",
+          title: "Human iPSC Differentiation Under Simulated Microgravity",
+          authors: "Kim, S., et al.",
+          year: 2019,
+          species: "Human",
+          mission: "Ground-based Simulation",
+          summary:
+            "Induced pluripotent stem cells exhibited altered differentiation efficiency under clinostat-simulated microgravity conditions, with reduced capacity to form specific lineages. Cell fate determination pathways and epigenetic regulatory mechanisms showed significant changes compared to normal gravity controls. This study has implications for understanding stem cell behavior in space and potential use of iPSC technology for regenerative medicine during long-duration missions.",
+          badges: ["cell-biology"],
+          citations: 87,
+          dataAvailable: true,
+          url: "https://osdr.nasa.gov/bio/repo/data/studies/OSD-107",
+        },
+        {
+          id: "OSD-108",
+          title: "DNA Repair Mechanisms in Yeast After Spaceflight",
+          authors: "Tanaka, K., et al.",
+          year: 2014,
+          species: "Yeast",
+          mission: "Space Shuttle",
+          summary:
+            "DNA damage response genes RAD51 and RAD52 were significantly upregulated in yeast following short-duration space missions, indicating activation of homologous recombination repair pathways. The study documented increased mutation rates and chromosomal instability in space-exposed yeast populations. These results provided early evidence for elevated DNA damage in the spaceflight environment and informed radiation protection strategies for future missions.",
+          badges: ["genetics"],
+          citations: 58,
+          dataAvailable: false,
+          url: "https://osdr.nasa.gov/bio/repo/data/studies/OSD-108",
+        },
+        {
+          id: "OSD-109",
+          title: "Liver Proteomics of Mice in Microgravity",
+          authors: "Martinez, P., et al.",
+          year: 2018,
+          species: "Mouse",
+          mission: "ISS",
+          summary:
+            "Proteomic analysis of mouse liver tissue showed significant metabolic shifts in lipid metabolism and oxidative stress pathways during microgravity exposure. Key enzymes involved in fatty acid oxidation and antioxidant defense systems were differentially expressed. The research revealed systemic metabolic adaptations to spaceflight that could contribute to astronaut health issues and informed nutritional countermeasure development.",
+          badges: ["proteomics"],
+          citations: 73,
+          dataAvailable: true,
+          url: "https://osdr.nasa.gov/bio/repo/data/studies/OSD-109",
+        },
+        {
+          id: "OSD-121",
+          title: "Human Organoid Development in Microgravity",
+          authors: "Smith, L., et al.",
+          year: 2022,
+          species: "Human",
+          mission: "ISS",
+          summary:
+            "Brain and intestinal organoids displayed significant changes in differentiation markers and tissue architecture after orbital culture on the ISS. Three-dimensional tissue structures showed altered cell-cell interactions, modified extracellular matrix deposition, and changes in organ-specific gene expression profiles. This groundbreaking work demonstrated the feasibility of growing complex human tissues in space for disease modeling and pharmaceutical research.",
+          badges: ["stem-cell", "recent"],
+          citations: 95,
+          dataAvailable: true,
+          url: "https://osdr.nasa.gov/bio/repo/data/studies/OSD-121",
+        },
+        {
+          id: "OSD-122",
+          title: "Radiation Dose Mapping During Artemis Missions",
+          authors: "Nguyen, P., et al.",
+          year: 2023,
+          species: "N/A",
+          mission: "Artemis I",
+          summary:
+            "Dosimeter data from the uncrewed Artemis I mission revealed heterogeneous radiation exposure patterns in deep-space environments beyond low Earth orbit. Measurements showed significantly higher galactic cosmic ray and solar particle event exposure compared to ISS levels. This critical dataset informs radiation shielding requirements and crew exposure limits for future lunar missions and deep space exploration.",
+          badges: ["radiation", "recent"],
+          citations: 37,
+          dataAvailable: true,
+          url: "https://osdr.nasa.gov/bio/repo/data/studies/OSD-122",
+        },
+        {
+          id: "OSD-123",
+          title: "Metabolomic Analysis of Space-Flown Plants",
+          authors: "O'Neil, A., et al.",
+          year: 2019,
+          species: "Arabidopsis",
+          mission: "ISS",
+          summary:
+            "Metabolite profiling of space-flown Arabidopsis revealed significant shifts in amino acid biosynthesis and carbohydrate metabolism pathways under spaceflight stress conditions. Accumulation of stress-related metabolites and altered primary metabolism suggested adaptive responses to the space environment. The comprehensive metabolomic data complemented transcriptomic studies and provided insights into plant stress physiology relevant for life support systems.",
+          badges: ["metabolomics"],
+          citations: 66,
+          dataAvailable: true,
+          url: "https://osdr.nasa.gov/bio/repo/data/studies/OSD-123",
+        },
+        {
+          id: "OSD-124",
+          title: "Neurotransmitter Levels in Space-Exposed Rodents",
+          authors: "Diaz, M., et al.",
+          year: 2011,
+          species: "Rat",
+          mission: "Space Shuttle",
+          summary:
+            "Brain tissue assays from space-exposed rodents showed altered dopamine and serotonin turnover rates, indicating disrupted neurotransmitter homeostasis after microgravity exposure. Neurochemical analysis revealed region-specific changes in monoamine levels and metabolites. These findings raised concerns about potential mood and cognitive effects during spaceflight and contributed to understanding of neurological adaptation to space environments.",
+          badges: ["neuroscience"],
+          citations: 78,
+          dataAvailable: false,
+          url: "https://osdr.nasa.gov/bio/repo/data/studies/OSD-124",
+        },
+        {
+          id: "OSD-125",
+          title:
+            "Cellular Senescence in Human Fibroblasts Under Space Radiation",
+          authors: "Perez, R., et al.",
+          year: 2020,
+          species: "Human",
+          mission: "Ground-based Radiation",
+          summary:
+            "Ground-based radiation exposure experiments on human fibroblasts revealed increased p21 expression and accelerated telomere shortening following chronic radiation doses simulating deep space conditions. Cellular senescence markers and DNA damage foci persisted even after exposure cessation. The research highlighted long-term cellular aging risks from space radiation and informed development of radiation countermeasures for extended missions beyond Earth's magnetosphere.",
+          badges: ["aging", "recent"],
+          citations: 98,
+          dataAvailable: true,
+          url: "https://osdr.nasa.gov/bio/repo/data/studies/OSD-125",
+        },
+        {
+          id: "OSD-126",
+          title: "Gene Expression in Mice Kidneys After Spaceflight",
+          authors: "Brown, A., et al.",
+          year: 2018,
+          species: "Mouse",
+          mission: "ISS",
+          summary:
+            "Renal transcriptome analysis of space-flown mice identified significant changes in water transport proteins and stress response pathways, particularly aquaporin expression and osmotic regulation genes. The kidney showed adaptations to fluid redistribution that occurs in microgravity. Understanding renal responses is critical for managing astronaut health during missions where fluid shifts can affect cardiovascular and renal function.",
+          badges: ["renal"],
+          citations: 59,
+          dataAvailable: true,
+          url: "https://osdr.nasa.gov/bio/repo/data/studies/OSD-126",
+        },
+        {
+          id: "OSD-127",
+          title: "Plant Nutrient Utilization in Microgravity",
+          authors: "Liu, J., et al.",
+          year: 2017,
+          species: "Wheat",
+          mission: "ISS",
+          summary:
+            "Nutrient uptake efficiency and nitrate metabolism were significantly impaired under altered root orientation conditions in microgravity-grown wheat. Molecular analysis showed downregulation of nitrogen assimilation genes and reduced expression of nutrient transporters. These findings are critical for developing effective plant growth systems for space agriculture and closed-loop life support on long-duration missions.",
+          badges: ["botany"],
+          citations: 61,
+          dataAvailable: true,
+          url: "https://osdr.nasa.gov/bio/repo/data/studies/OSD-127",
+        },
+        {
+          id: "OSD-128",
+          title: "Comparative RNA-Seq of Space-Flown Human Cells",
+          authors: "Vega, R., et al.",
+          year: 2021,
+          species: "Human",
+          mission: "ISS",
+          summary:
+            "RNA sequencing of space-cultured human fibroblasts revealed altered mitochondrial function and cell-cycle regulation compared to ground controls. Differential gene expression analysis identified disrupted oxidative phosphorylation pathways and modified cell proliferation markers. The comprehensive transcriptomic dataset provides valuable insights into cellular adaptation mechanisms and stress responses during spaceflight at the molecular level.",
+          badges: ["transcriptomics", "recent"],
+          citations: 110,
+          dataAvailable: true,
+          url: "https://osdr.nasa.gov/bio/repo/data/studies/OSD-128",
+        },
+        {
+          id: "OSD-129",
+          title: "Long-Term Plant Growth in Lunar Soil Simulant",
+          authors: "Adams, K., et al.",
+          year: 2023,
+          species: "Arabidopsis",
+          mission: "Ground-based",
+          summary:
+            "Plants grown in lunar regolith simulant showed significant stress-related metabolic and morphological changes including reduced biomass and altered root architecture. Transcriptomic analysis revealed upregulation of metal stress and defense response genes. This pioneering research is essential for understanding the challenges of in-situ resource utilization for future lunar agriculture and establishing permanent lunar habitats.",
+          badges: ["astrobotany", "recent"],
+          citations: 33,
+          dataAvailable: true,
+          url: "https://osdr.nasa.gov/bio/repo/data/studies/OSD-129",
+        },
+        {
+          id: "OSD-130",
+          title: "Bone Marrow Stem Cell Response to Microgravity",
+          authors: "Rodriguez, L., et al.",
+          year: 2015,
+          species: "Mouse",
+          mission: "ISS",
+          summary:
+            "Bone marrow stem cell proliferation and osteogenic differentiation capacity significantly decreased during spaceflight exposure. Flow cytometry and gene expression analysis revealed altered stem cell marker expression and reduced bone-forming potential. These findings help explain spaceflight-induced bone loss and support development of targeted cellular therapies to maintain skeletal health during extended space missions.",
+          badges: ["stem-cell"],
+          citations: 90,
+          dataAvailable: false,
+          url: "https://osdr.nasa.gov/bio/repo/data/studies/OSD-130",
+        },
+        {
+          id: "OSD-110",
+          title: "Neural Activity of C. elegans in Space",
+          authors: "Zhao, L., et al.",
+          year: 2020,
+          species: "C. elegans",
+          mission: "ISS",
+          summary:
+            "Calcium imaging of C. elegans nervous system revealed significant neural network plasticity and behavioral adaptations during microgravity exposure on the ISS. Changes in neurotransmission patterns and synaptic activity were observed in locomotion and sensory processing circuits. This study provided insights into how nervous systems adapt to novel gravitational environments and has implications for understanding neurological changes in astronauts.",
+          badges: ["neurobiology", "recent"],
+          citations: 62,
+          dataAvailable: true,
+          url: "https://osdr.nasa.gov/bio/repo/data/studies/OSD-110",
+        },
+        {
+          id: "OSD-79",
+          title: "Zebrafish Bone Density Changes During Spaceflight",
+          authors: "Aceto, J., et al.",
+          year: 2016,
+          species: "Zebrafish",
+          mission: "ISS SpaceX-8",
+          summary:
+            "First study of zebrafish bone development in microgravity environment showed significant bone density loss after 56 days aboard the ISS. Micro-CT imaging revealed altered osteoblast activity and disrupted calcium deposition patterns in developing skeletal structures. This research established zebrafish as a valuable vertebrate model for studying spaceflight effects on bone formation and testing potential countermeasures.",
+          badges: ["spaceflight"],
+          citations: 132,
+          dataAvailable: true,
+          url: "https://osdr.nasa.gov/bio/repo/data/studies/OSD-79",
+        },
+        {
+          id: "OSD-142",
+          title: "Space Radiation Effects on Brain Organoids",
+          authors: "Silveira, W.A., et al.",
+          year: 2020,
+          species: "Human",
+          mission: "Ground-based Radiation",
+          summary:
+            "3D brain organoids exposed to simulated space radiation doses showed significant neuroinflammation and DNA damage responses through single-cell RNA-seq analysis. Altered neurodevelopmental pathways and increased oxidative stress markers were observed in neural progenitor populations. This cutting-edge research provides crucial data on potential cognitive risks from deep space radiation exposure and informs neuroprotective countermeasure development.",
+          badges: ["high-impact", "recent"],
+          citations: 89,
+          dataAvailable: true,
+          url: "https://osdr.nasa.gov/bio/repo/data/studies/OSD-142",
+        },
+        {
+          id: "OSD-23",
+          title: "Lettuce Growth Optimization in Controlled Environment",
+          authors: "Massa, G.D., et al.",
+          year: 2017,
+          species: "Lactuca sativa",
+          mission: "ISS Veggie Facility",
+          summary:
+            "LED lighting optimization experiments for lettuce cultivation aboard ISS demonstrated successful fresh food production in space. Metabolomics analysis showed enhanced antioxidant production and modified nutritional profiles under red/blue LED combinations compared to ground controls. This research validated vegetable production systems for supplementing astronaut diets and provided data for developing sustainable space agriculture systems.",
+          badges: ["spaceflight", "recent"],
+          citations: 167,
+          dataAvailable: true,
+          url: "https://osdr.nasa.gov/bio/repo/data/studies/OSD-23",
+        },
+        {
+          id: "OSD-47",
+          title: "Space Biology Effects on Arabidopsis Circadian Clock",
+          authors: "Paul, A.L., et al.",
+          year: 2013,
+          species: "Arabidopsis",
+          mission: "STS-131 Space Shuttle",
+          summary:
+            "Investigation of circadian rhythm disruption in plants exposed to spaceflight environment revealed altered expression of core clock genes and modified diurnal patterns. Molecular analysis showed phase shifts in circadian oscillations and changes in light-responsive transcription factors. Understanding how plants maintain temporal regulation in space is essential for optimizing crop production schedules in controlled environment agriculture systems for long missions.",
+          badges: ["spaceflight"],
+          citations: 187,
+          dataAvailable: true,
+          url: "https://osdr.nasa.gov/bio/repo/data/studies/OSD-47",
+        },
+        {
+          id: "OSD-120",
+          title: "Yeast Cellular Response to Simulated Microgravity",
+          authors: "Hammond, T.G., et al.",
+          year: 2017,
+          species: "Yeast",
+          mission: "Ground-based HARV",
+          summary:
+            "High Aspect Ratio Vessel (HARV) bioreactor was used to simulate microgravity effects on yeast cultures, showing altered cellular metabolism and gene expression patterns. Transcriptomic analysis revealed changes in cell wall biosynthesis, stress response pathways, and metabolic regulation. This ground-based simulation approach provides cost-effective preliminary data for space experiments and helps identify key cellular responses to reduced gravity conditions.",
+          badges: ["recent"],
+          citations: 67,
+          dataAvailable: true,
+          url: "https://osdr.nasa.gov/bio/repo/data/studies/OSD-120",
+        },
+      ];
+
+      // Function to generate study-specific experimental data plots
+      function generateStudyDataPlot(study) {
+        const studyType = study.title.toLowerCase();
+
+        if (studyType.includes("muscle") || studyType.includes("skeletal")) {
+          // Muscle Mass vs Time plot
+          return {
+            title: "Muscle Mass vs Time",
+            xLabel: "Days in Space",
+            yLabel: "Muscle Mass (%)",
+            color: "#ff6b6b",
+            points: [
+              { x: 0, y: 100 },
+              { x: 7, y: 95 },
+              { x: 14, y: 88 },
+              { x: 21, y: 82 },
+              { x: 30, y: 75 },
+            ],
+          };
+        } else if (
+          studyType.includes("gene") ||
+          studyType.includes("expression")
+        ) {
+          // Gene Expression vs Time plot
+          return {
+            title: "Gene Expression Level",
+            xLabel: "Hours Post-Launch",
+            yLabel: "Expression Fold Change",
+            color: "#4ecdc4",
+            points: [
+              { x: 0, y: 1.0 },
+              { x: 6, y: 1.3 },
+              { x: 12, y: 2.1 },
+              { x: 24, y: 2.8 },
+              { x: 48, y: 3.2 },
+            ],
+          };
+        } else if (
+          studyType.includes("bone") ||
+          studyType.includes("density")
+        ) {
+          // Bone Density vs Time plot
+          return {
+            title: "Bone Density Loss",
+            xLabel: "Weeks in Microgravity",
+            yLabel: "Bone Density (%)",
+            color: "#45b7d1",
+            points: [
+              { x: 0, y: 100 },
+              { x: 2, y: 96 },
+              { x: 4, y: 91 },
+              { x: 6, y: 85 },
+              { x: 8, y: 78 },
+            ],
+          };
+        } else if (
+          studyType.includes("plant") ||
+          studyType.includes("arabidopsis") ||
+          studyType.includes("lettuce")
+        ) {
+          // Plant Growth vs Time plot
+          return {
+            title: "Plant Growth Rate",
+            xLabel: "Days",
+            yLabel: "Height (cm)",
+            color: "#96ceb4",
+            points: [
+              { x: 0, y: 0.5 },
+              { x: 5, y: 2.1 },
+              { x: 10, y: 4.8 },
+              { x: 15, y: 7.2 },
+              { x: 20, y: 9.1 },
+            ],
+          };
+        } else if (studyType.includes("immune") || studyType.includes("cell")) {
+          // Cell Count vs Time plot
+          return {
+            title: "T-Cell Activation",
+            xLabel: "Hours",
+            yLabel: "Cell Count (×10³)",
+            color: "#ff8e53",
+            points: [
+              { x: 0, y: 10 },
+              { x: 4, y: 8 },
+              { x: 8, y: 6 },
+              { x: 12, y: 5 },
+              { x: 24, y: 4 },
+            ],
+          };
+        } else {
+          // Default research progress plot
+          return {
+            title: "Research Progress",
+            xLabel: "Time Points",
+            yLabel: "Measurement",
+            color: "#7c3aed",
+            points: [
+              { x: 1, y: 20 },
+              { x: 2, y: 45 },
+              { x: 3, y: 60 },
+              { x: 4, y: 75 },
+              { x: 5, y: 85 },
+            ],
+          };
+        }
+      }
+
+      function generateVizData(study) {
+        const seed = parseInt(study.id.split("-")[1]) * 123;
+        const rand = (n) => ((seed * n * 9301 + 49297) % 233280) / 233280;
+
+        const citationPct = Math.min(100, (study.citations / 500) * 100);
+        const impactScore = study.badges.includes("high-impact")
+          ? 85 + rand(1) * 10
+          : 50 + rand(1) * 30;
+        const recentScore =
+          study.year >= 2015 ? 80 + rand(2) * 15 : 40 + rand(2) * 30;
+
+        const bars = [
+          Math.floor(30 + rand(3) * 40),
+          Math.floor(50 + rand(4) * 35),
+          Math.floor(40 + rand(5) * 40),
+          Math.floor(60 + rand(6) * 30),
+          Math.floor(citationPct * 0.7 + rand(7) * 20),
+        ];
+
+        return { citationPct, impactScore, recentScore, bars };
+      }
+      // Add this before your displayResults function
+      function generateKnowledgeGraph(studies) {
+        // Extract entities and relationships
+        const entities = new Set();
+        const relationships = [];
+
+        studies.forEach((study) => {
+          // Add study as main entity
+          entities.add({
+            id: study.id,
+            type: "study",
+            label: study.title.substring(0, 30) + "...",
+            color: "#3b82f6",
+          });
+
+          // Add species
+          entities.add({
+            id: study.species,
+            type: "species",
+            label: study.species,
+            color: "#10b981",
+          });
+          relationships.push({
+            source: study.id,
+            target: study.species,
+            type: "studies",
+          });
+
+          // Add mission
+          entities.add({
+            id: study.mission,
+            type: "mission",
+            label: study.mission,
+            color: "#f59e0b",
+          });
+          relationships.push({
+            source: study.id,
+            target: study.mission,
+            type: "conducted_on",
+          });
+
+          // Extract keywords from title and summary
+          const keywords = [
+            ...study.title.toLowerCase().split(" "),
+            ...study.summary.toLowerCase().split(" "),
+          ]
+            .filter((word) =>
+              [
+                "microgravity",
+                "gene",
+                "expression",
+                "muscle",
+                "bone",
+                "immune",
+                "cell",
+                "radiation",
+                "plant",
+                "growth",
+              ].includes(word),
+            )
+            .slice(0, 3);
+
+          keywords.forEach((keyword) => {
+            entities.add({
+              id: keyword,
+              type: "concept",
+              label: keyword,
+              color: "#8b5cf6",
+            });
+            relationships.push({
+              source: study.id,
+              target: keyword,
+              type: "involves",
+            });
+          });
+        });
+
+        return {
+          entities: Array.from(entities),
+          relationships: relationships,
+        };
+      }
+
+      function createKnowledgeGraphSVG(studies) {
+        const graph = generateKnowledgeGraph(studies);
+        const width = 600;
+        const height = 400;
+
+        // Simple force-directed layout simulation
+        const nodes = graph.entities.map((entity, i) => ({
+          ...entity,
+          x: 100 + (i % 8) * 60 + Math.random() * 40,
+          y: 100 + Math.floor(i / 8) * 60 + Math.random() * 40,
+          r: entity.type === "study" ? 8 : 6,
+        }));
+
+        const links = graph.relationships
+          .map((rel) => {
+            const source = nodes.find((n) => n.id === rel.source);
+            const target = nodes.find((n) => n.id === rel.target);
+            return { source, target, type: rel.type };
+          })
+          .filter((link) => link.source && link.target);
+
+        // Generate SVG
+        let svg = `<svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">`;
+
+        // Add definitions for arrowheads
+        svg += `<defs>
+                <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                  <polygon points="0 0, 10 3.5, 0 7" fill="#64748b" />
+                </marker>
+              </defs>`;
+
+        // Draw links first (so they appear behind nodes)
+        links.forEach((link) => {
+          svg += `<line x1="${link.source.x}" y1="${link.source.y}" x2="${link.target.x}" y2="${link.target.y}"
+                        stroke="#cbd5e1" stroke-width="2" marker-end="url(#arrowhead)" opacity="0.6" />`;
+        });
+
+        // Draw nodes
+        nodes.forEach((node) => {
+          svg += `<circle cx="${node.x}" cy="${node.y}" r="${node.r}" fill="${node.color}"
+                        stroke="white" stroke-width="2" opacity="0.9" />`;
+
+          // Add labels
+          const fontSize = node.type === "study" ? "10" : "9";
+          svg += `<text x="${node.x}" y="${node.y + node.r + 12}" text-anchor="middle"
+                        font-size="${fontSize}" fill="#374151" font-weight="600">
+                        ${node.label.length > 15 ? node.label.substring(0, 15) + "..." : node.label}
+                        </text>`;
+        });
+
+        // Add legend
+        svg += `<g transform="translate(20, 20)">
+                <rect width="120" height="80" fill="white" stroke="#e5e7eb" rx="5" opacity="0.9" />
+                <text x="10" y="15" font-size="12" font-weight="600" fill="#374151">Legend</text>
+                <circle cx="15" cy="30" r="6" fill="#3b82f6" />
+                <text x="25" y="34" font-size="10" fill="#374151">Studies</text>
+                <circle cx="15" cy="45" r="6" fill="#10b981" />
+                <text x="25" y="49" font-size="10" fill="#374151">Species</text>
+                <circle cx="15" cy="60" r="6" fill="#f59e0b" />
+                <text x="25" y="64" font-size="10" fill="#374151">Missions</text>
+                <circle cx="75" cy="30" r="6" fill="#8b5cf6" />
+                <text x="85" y="34" font-size="10" fill="#374151">Concepts</text>
+              </g>`;
+
+        svg += "</svg>";
+        return svg;
+      }
+
+      function displayResults(results) {
+        const rc = document.getElementById("results-container");
+        const rco = document.getElementById("results-count");
+        rco.textContent = `Found ${results.length} publications`;
+        let html = "";
+        results.forEach((p) => {
+          const badges = p.badges
+            .map((b) => {
+              let c = "badge-high-impact";
+              if (b === "recent") c = "badge-recent";
+              if (b === "spaceflight") c = "badge-spaceflight";
+              return `<span class="badge ${c}">${b}</span>`;
+            })
+            .join("");
+
+          const idNum = parseInt(p.id.split("-")[1]);
+          const citePct = Math.min(95, Math.round((p.citations / 450) * 100));
+          const bar1 = 30 + ((idNum * 7) % 40);
+          const bar2 = 45 + ((idNum * 11) % 35);
+          const bar3 = 35 + ((idNum * 13) % 45);
+          const bar4 = 55 + ((idNum * 17) % 35);
+          const bar5 =
+            citePct > 50 ? 70 + ((idNum * 5) % 20) : 40 + ((idNum * 9) % 30);
+
+          html += `<div class="study-card"><div class="study-header"><div class="study-title">${p.title}</div><div class="study-badges">${badges}</div></div><div class="study-metadata"><div class="metadata-item"><span class="metadata-label">Authors</span><span class="metadata-value">${p.authors}</span></div><div class="metadata-item"><span class="metadata-label">Year</span><span class="metadata-value">${p.year}</span></div><div class="metadata-item"><span class="metadata-label">Species</span><span class="metadata-value">${p.species}</span></div><div class="metadata-item"><span class="metadata-label">Mission</span><span class="metadata-value">${p.mission}</span></div><div class="metadata-item"><span class="metadata-label">Citations</span><span class="metadata-value">${p.citations}</span></div><div class="metadata-item"><span class="metadata-label">Data</span><span class="metadata-value">${p.dataAvailable ? "✓ Yes" : "✗ No"}</span></div></div><div class="ai-summary"><div class="ai-summary-header">🤖 AI Summary</div><div class="ai-summary-text">${p.summary}</div></div><div class="mini-viz-container"><div class="mini-viz-card"><div class="mini-viz-title">Citation Impact: ${citePct}%</div><div class="viz-placeholder"><div style="width:100%;height:100%;background:linear-gradient(to top,#3b82f6 ${citePct}%,#93c5fd ${citePct}% ${citePct + 20}%,#dbeafe ${citePct + 20}%);border-radius:10px;display:flex;align-items:center;justify-content:center;color:#1e40af;font-weight:700;font-size:1.2rem;flex-direction:column;"><div>${citePct}%</div><small style="font-size:0.8rem;opacity:0.8;margin-top:5px;">${p.citations} citations</small></div></div></div><div class="mini-viz-card"><div class="mini-viz-title">Research Metrics</div><div class="viz-placeholder"><div style="display:flex;align-items:flex-end;justify-content:space-around;height:100%;padding:10px;"><div style="display:flex;flex-direction:column;align-items:center;height:100%;justify-content:flex-end;"><div style="width:30px;height:${Math.max(20, Math.min(80, p.citations / 3))}%;background:#ff6b6b;border-radius:4px;margin-bottom:8px;position:relative;"><div style="position:absolute;top:-20px;left:50%;transform:translateX(-50%);font-size:0.7rem;color:#333;font-weight:600;">${p.citations}</div></div><small style="font-size:0.75rem;color:#666;text-align:center;">Citations</small></div><div style="display:flex;flex-direction:column;align-items:center;height:100%;justify-content:flex-end;"><div style="width:30px;height:${Math.max(20, Math.min(80, (2025 - p.year) * 8))}%;background:#4ecdc4;border-radius:4px;margin-bottom:8px;position:relative;"><div style="position:absolute;top:-20px;left:50%;transform:translateX(-50%);font-size:0.7rem;color:#333;font-weight:600;">${2025 - p.year}y</div></div><small style="font-size:0.75rem;color:#666;text-align:center;">Age</small></div><div style="display:flex;flex-direction:column;align-items:center;height:100%;justify-content:flex-end;"><div style="width:30px;height:${p.dataAvailable ? 75 : 25}%;background:#45b7d1;border-radius:4px;margin-bottom:8px;position:relative;"><div style="position:absolute;top:-20px;left:50%;transform:translateX(-50%);font-size:0.7rem;color:#333;font-weight:600;">${p.dataAvailable ? "✓" : "✗"}</div></div><small style="font-size:0.75rem;color:#666;text-align:center;">Data</small></div><div style="display:flex;flex-direction:column;align-items:center;height:100%;justify-content:flex-end;"><div style="width:30px;height:${Math.max(25, p.badges.length * 30)}%;background:#96ceb4;border-radius:4px;margin-bottom:8px;position:relative;"><div style="position:absolute;top:-20px;left:50%;transform:translateX(-50%);font-size:0.7rem;color:#333;font-weight:600;">${p.badges.length}</div></div><small style="font-size:0.75rem;color:#666;text-align:center;">Impact</small></div></div></div></div><div class="mini-viz-card"><div class="mini-viz-title">${(() => {
+            const plotData = generateStudyDataPlot(p);
+            return plotData.title;
+          })()}</div><div class="viz-placeholder" style="position:relative;overflow:hidden;"><svg style="width:100%;height:100%;" viewBox="0 0 280 160">${(() => {
+            const plotData = generateStudyDataPlot(p);
+            const maxX = Math.max(...plotData.points.map((pt) => pt.x));
+            const maxY = Math.max(...plotData.points.map((pt) => pt.y));
+            const minY = Math.min(...plotData.points.map((pt) => pt.y));
+
+            const svgPoints = plotData.points.map((pt) => ({
+              x: 30 + (pt.x / maxX) * 220,
+              y: 30 + (1 - (pt.y - minY) / (maxY - minY)) * 100,
+            }));
+
+            const pathData = svgPoints
+              .map((p, i) => `${i === 0 ? "M" : "L"} ${p.x} ${p.y}`)
+              .join(" ");
+
+            return `<defs><linearGradient id="grad${p.id}" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" style="stop-color:${plotData.color};stop-opacity:0.6" /><stop offset="100%" style="stop-color:${plotData.color};stop-opacity:0.1" /></linearGradient></defs><path d="M 30 130 ${pathData} L 250 130 Z" fill="url(#grad${p.id})" /><path d="${pathData}" stroke="${plotData.color}" stroke-width="3" fill="none" />${svgPoints.map((pt, i) => `<circle cx="${pt.x}" cy="${pt.y}" r="4" fill="${plotData.color}" stroke="white" stroke-width="2" /><text x="${pt.x}" y="${pt.y - 10}" text-anchor="middle" font-size="9" fill="#666">${plotData.points[i].y}</text>`).join("")}<text x="140" y="155" text-anchor="middle" font-size="11" fill="#666">${plotData.xLabel} vs ${plotData.yLabel}</text>`;
+          })()}</svg></div></div></div><div class="study-actions"><button class="action-btn btn-primary" onclick="window.open('${p.url}','_blank')">🔗 View NASA Study</button><button class="action-btn btn-secondary" onclick="exploreNetwork('${p.id}')">🕸️ Knowledge Graph</button></div></div>`;
+        });
+        rc.innerHTML = html;
+      }
+
+      function checkYearRange(year, range) {
+        const [start, end] = range.split("-").map(Number);
+        return year >= start && year <= end;
+      }
+
+      function searchPublications() {
+        showLoading();
+        setTimeout(() => {
+          const keyword = document
+            .getElementById("pub-keywords")
+            .value.toLowerCase();
+          const species = document
+            .getElementById("pub-species")
+            .value.toLowerCase();
+          const mission = document
+            .getElementById("pub-mission")
+            .value.toLowerCase();
+          const yearRange = document.getElementById("pub-year").value;
+
+          const results = nasaStudies.filter((study) => {
+            const matchKeyword =
+              !keyword ||
+              study.title.toLowerCase().includes(keyword) ||
+              study.summary.toLowerCase().includes(keyword) ||
+              study.species.toLowerCase().includes(keyword);
+            const matchSpecies =
+              !species || study.species.toLowerCase().includes(species);
+            const matchMission =
+              !mission || study.mission.toLowerCase().includes(mission);
+            const matchYear =
+              !yearRange || checkYearRange(study.year, yearRange);
+            return matchKeyword && matchSpecies && matchMission && matchYear;
+          });
+
+          displayResults(results);
+          showInsights();
+        }, 1000);
+      }
+
+      function searchExperiments() {
+        showLoading();
+        setTimeout(() => {
+          const expType = document
+            .getElementById("exp-type")
+            .value.toLowerCase();
+          const results = nasaStudies.filter((study) => {
+            if (!expType) return true;
+            if (expType === "spaceflight")
+              return study.badges.includes("spaceflight");
+            if (expType === "ground-analog")
+              return !study.badges.includes("spaceflight");
+            return true;
+          });
+          displayResults(results);
+          showInsights();
+        }, 1000);
+      }
+
+      function searchDatasets() {
+        showLoading();
+        setTimeout(() => {
+          const results = nasaStudies.filter((s) => s.dataAvailable);
+          displayResults(results);
+          showInsights();
+        }, 1000);
+      }
+
+      function advancedSearch() {
+        showLoading();
+        setTimeout(() => {
+          const query = document
+            .getElementById("advanced-query")
+            .value.toLowerCase();
+          const results = nasaStudies.filter((study) =>
+            Object.values(study).join(" ").toLowerCase().includes(query),
+          );
+          displayResults(results);
+          showInsights();
+        }, 1000);
+      }
+
+      function showLoading() {
+        document.getElementById("results-section").style.display = "block";
+        document.getElementById("results-container").innerHTML =
+          '<div class="loading-container"><div class="loading-spinner"></div><p style="color:#64748b;font-size:1.1rem;">Searching NASA database...</p></div>';
+      }
+
+      function showInsights() {
+        document.getElementById("insights-panel").style.display = "block";
+        document.getElementById("insights-content").innerHTML =
+          '<div class="insight-item"><h4>Research Progress</h4><p>Extensive multi-species investigations have established a robust understanding of how spaceflight factors—such as microgravity, radiation exposure, and isolation stressors—affect cellular and physiological systems.Studies demonstrate consistent alterations in musculoskeletal, immune, and neural pathways across human, animal, and plant models, with converging evidence on molecular mechanisms involving oxidative stress, gene expression shifts, and adaptive remodeling.</p></div><div class="insight-item"><h4>Knowledge Gaps</h4><p>Despite significant progress, gaps remain in understanding long-duration and cumulative effects of deep-space exposure on complex biological systems. Current data are limited in longitudinal scope, particularly regarding the efficacy and durability of countermeasures across multiple physiological domains.There is also insufficient integration between radiation, microgravity, and psychosocial stress research, constraining predictive modeling and translational applications for future crewed missions.</p></div><div class="insight-item"><h4>Actionable Insights</h4><p> Future research should prioritize multi-system and longitudinal studies that bridge molecular findings with functional outcomes. Integrated countermeasure approaches—combining pharmacological, mechanical, and behavioral interventions—are critical to mitigate cumulative spaceflight stressors. Development of reliable biomarkers for early detection of cellular dysfunction and adaptive resilience will enhance risk assessment frameworks and enable personalized health strategies for astronauts on extended missions.</p></div>';
+      }
+
+      function fillSearch(query) {
+        document.getElementById("pub-keywords").value = query;
+        searchPublications();
+      }
+
+      function openFullVisualization(id) {
+        alert(
+          `Opening visualization dashboard for ${id}\n\nInteractive plots, heatmaps, PCA/t-SNE, statistical analysis`,
+        );
+      }
+
+      function viewDatasets(id) {
+        alert(
+          `Viewing datasets for ${id}\n\nRNA-seq, proteomics, imaging data available from NASA OSDR`,
+        );
+      }
+
+      function exploreNetwork(id) {
+        // Get current search results or all studies
+        const currentStudies = document.getElementById("results-container")
+          .innerHTML
+          ? nasaStudies.filter((study) =>
+              document
+                .getElementById("results-container")
+                .innerHTML.includes(study.id),
+            )
+          : nasaStudies;
+
+        // Create modal overlay
+        const modalHTML = `
+          <div id="knowledge-graph-modal" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:10000;display:flex;align-items:center;justify-content:center;">
+            <div style="background:white;border-radius:20px;padding:30px;max-width:90%;max-height:90%;overflow:auto;position:relative;">
+              <button onclick="closeKnowledgeGraph()" style="position:absolute;top:15px;right:20px;background:none;border:none;font-size:24px;cursor:pointer;color:#666;">&times;</button>
+              <h2 style="margin:0 0 20px 0;color:#374151;font-family:'Comfortaa',cursive;">Knowledge Graph: Research Connections</h2>
+              <div style="border:2px solid #e5e7eb;border-radius:15px;padding:20px;background:#f9fafb;">
+                ${createKnowledgeGraphSVG(currentStudies)}
+              </div>
+              <div style="margin-top:20px;padding:15px;background:#eff6ff;border-radius:10px;">
+                <h4 style="margin:0 0 10px 0;color:#1e40af;">Graph Insights:</h4>
+                <p style="margin:0;color:#374151;line-height:1.6;">This visualization shows how studies, species, missions, and research concepts are interconnected. Larger nodes represent studies, while colored connections show relationships between different research elements.</p>
+              </div>
+            </div>
+          </div>
+        `;
+
+        document.body.insertAdjacentHTML("beforeend", modalHTML);
+      }
+
+      function closeKnowledgeGraph() {
+        const modal = document.getElementById("knowledge-graph-modal");
+        if (modal) modal.remove();
+      }
+      function exportResults() {
+        alert("Export options:\nCSV, JSON, PDF, BibTeX, Excel");
+      }
+
+      window.addEventListener("load", () => {
+        setTimeout(() => {
+          document.getElementById("pub-keywords").value = "microgravity";
+          searchPublications();
+        }, 500);
+      });
+    </script>
+  </body>
+</html>

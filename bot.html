@@ -1,0 +1,642 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/remixicon@4.1.0/fonts/remixicon.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"
+    />
+    <link rel="stylesheet" href="style.css" />
+    <title>AI - SpaceBio Explorer</title>
+
+    <style>
+      /* Header animations */
+      .header__container::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(255, 255, 255, 0.1),
+          transparent
+        );
+        animation: shimmer 3s infinite;
+        z-index: 1;
+      }
+
+      @keyframes shimmer {
+        0% {
+          left: -100%;
+        }
+        100% {
+          left: 100%;
+        }
+      }
+
+      .header__content h1 {
+        animation: fadeInUp 1s ease-out;
+        background: linear-gradient(45deg, #2563eb, #dc2626);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      .header__content h3 {
+        animation: fadeInUp 1s ease-out 0.3s both;
+      }
+
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* Navigation hover effects */
+      .nav__links li a {
+        position: relative;
+        transition: all 0.3s ease;
+      }
+
+      .nav__links li a::after {
+        content: "";
+        position: absolute;
+        bottom: -5px;
+        left: 50%;
+        width: 0;
+        height: 3px;
+        background: linear-gradient(45deg, #2563eb, #dc2626);
+        transition: all 0.3s ease;
+        transform: translateX(-50%);
+        border-radius: 2px;
+      }
+
+      .nav__links li a:hover::after {
+        width: 100%;
+      }
+
+      .nav__links li a:hover {
+        transform: translateY(-2px);
+        color: #2563eb;
+      }
+
+      /* Progress bar */
+      .progress-indicator {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: rgba(37, 99, 235, 0.2);
+        z-index: 1000;
+      }
+
+      .progress-bar {
+        height: 100%;
+        background: linear-gradient(90deg, #2563eb, #dc2626);
+        width: 0%;
+        transition: width 0.1s ease;
+      }
+
+      /* Enhanced chat container */
+      .chat-container {
+        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+        border-radius: 25px;
+        padding: 40px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+        margin: 40px auto;
+        max-width: 900px;
+        border: 2px solid rgba(37, 99, 235, 0.1);
+        transition: all 0.3s ease;
+      }
+
+      .chat-container:hover {
+        box-shadow: 0 25px 70px rgba(0, 0, 0, 0.15);
+        transform: translateY(-5px);
+      }
+
+      #conversation {
+        list-style: none;
+        padding: 0;
+        margin: 0 0 30px 0;
+        max-height: 500px;
+        overflow-y: auto;
+        background: rgba(248, 250, 252, 0.5);
+        border-radius: 20px;
+        padding: 25px;
+        scrollbar-width: thin;
+        scrollbar-color: #2563eb #f1f5f9;
+      }
+
+      #conversation::-webkit-scrollbar {
+        width: 8px;
+      }
+
+      #conversation::-webkit-scrollbar-track {
+        background: #f1f5f9;
+        border-radius: 10px;
+      }
+
+      #conversation::-webkit-scrollbar-thumb {
+        background: linear-gradient(135deg, #2563eb, #dc2626);
+        border-radius: 10px;
+      }
+
+      .user-message {
+        font-weight: 600;
+        color: #1e293b;
+        margin-bottom: 15px;
+        padding: 15px 20px;
+        background: linear-gradient(135deg, #e0f2fe, #dbeafe);
+        border-radius: 18px 18px 5px 18px;
+        display: inline-block;
+        max-width: 70%;
+        margin-left: auto;
+        box-shadow: 0 4px 15px rgba(37, 99, 235, 0.1);
+        animation: slideInRight 0.3s ease;
+      }
+
+      @keyframes slideInRight {
+        from {
+          opacity: 0;
+          transform: translateX(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+
+      .bot-message {
+        display: flex;
+        align-items: flex-start;
+        margin-bottom: 20px;
+        animation: slideInLeft 0.3s ease;
+      }
+
+      @keyframes slideInLeft {
+        from {
+          opacity: 0;
+          transform: translateX(-20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+
+      .bot-avatar {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        margin-right: 15px;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 5px 15px rgba(37, 99, 235, 0.3);
+        font-size: 1.2rem;
+      }
+
+      .bot-avatar::before {
+        content: "🤖";
+      }
+
+      .bot-bubble {
+        background: white;
+        padding: 18px 22px;
+        border-radius: 5px 18px 18px 18px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        max-width: 70%;
+        line-height: 1.6;
+        color: #334155;
+        border: 1px solid rgba(226, 232, 240, 0.8);
+      }
+
+      /* Input section */
+      .input-section {
+        display: flex;
+        gap: 15px;
+        align-items: center;
+        background: white;
+        padding: 20px;
+        border-radius: 20px;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+        border: 2px solid #e2e8f0;
+        transition: all 0.3s ease;
+      }
+
+      .input-section:focus-within {
+        border-color: #2563eb;
+        box-shadow: 0 8px 30px rgba(37, 99, 235, 0.15);
+      }
+      body {
+        /* Light cosmic gradient with subtle star sparkle effect */
+        background: linear-gradient(
+          135deg,
+          #d9e8ff 0%,
+          #f9fcff 40%,
+          #e1f0ff 70%,
+          #ffffff 100%
+        );
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+        position: relative;
+        overflow-x: hidden;
+        min-height: 100vh;
+      }
+      #user-input {
+        flex: 1;
+        padding: 15px 20px;
+        border: none;
+        border-radius: 15px;
+        font-size: 1rem;
+        font-family: "Poppins", sans-serif;
+        background: #f8fafc;
+        transition: all 0.3s ease;
+        outline: none;
+      }
+
+      #user-input:focus {
+        background: white;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+      }
+
+      #submit-button {
+        padding: 15px 35px;
+        background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        color: white;
+        border: none;
+        border-radius: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 1rem;
+        box-shadow: 0 5px 15px rgba(37, 99, 235, 0.3);
+      }
+
+      #submit-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(37, 99, 235, 0.4);
+      }
+
+      #submit-button:active {
+        transform: translateY(0);
+      }
+
+      /* Feature highlights */
+      .feature-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 25px;
+        margin: 40px 0;
+      }
+
+      .feature-item {
+        background: linear-gradient(135deg, #ffffff, #f8fafc);
+        padding: 25px;
+        border-radius: 20px;
+        text-align: center;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+      }
+
+      .feature-item:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
+        border-color: #2563eb;
+      }
+
+      .feature-icon {
+        font-size: 3rem;
+        margin-bottom: 15px;
+      }
+
+      .feature-item h4 {
+        font-size: 1.2rem;
+        margin-bottom: 10px;
+        background: linear-gradient(45deg, #2563eb, #dc2626);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      .feature-item p {
+        color: #64748b;
+        line-height: 1.6;
+        font-size: 0.95rem;
+      }
+
+      /* more buttons */
+      .interactive-btn {
+        display: inline-block;
+        padding: 15px 30px;
+        background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        color: white;
+        text-decoration: none;
+        border-radius: 50px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        margin: 10px;
+        border: none;
+        cursor: pointer;
+        font-size: 1rem;
+      }
+
+      .interactive-btn::before {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+        transition: all 0.6s ease;
+        transform: translate(-50%, -50%);
+      }
+
+      .interactive-btn:hover::before {
+        width: 300px;
+        height: 300px;
+      }
+
+      .interactive-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 15px 30px rgba(37, 99, 235, 0.4);
+      }
+
+      .interactive-btn.secondary {
+        background: linear-gradient(135deg, #dc2626, #b91c1c);
+      }
+
+      .interactive-btn.secondary:hover {
+        box-shadow: 0 15px 30px rgba(220, 38, 38, 0.4);
+      }
+
+      /* Floating buttons */
+      .floating-actions {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        z-index: 1000;
+      }
+
+      .floating-btn {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        border: none;
+        cursor: pointer;
+        font-size: 1.5rem;
+        color: white;
+        transition: all 0.3s ease;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .floating-btn.primary {
+        background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      }
+
+      .floating-btn.secondary {
+        background: linear-gradient(135deg, #dc2626, #b91c1c);
+      }
+
+      .floating-btn:hover {
+        transform: scale(1.1);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+      }
+
+      @media (max-width: 768px) {
+        .chat-container {
+          padding: 25px;
+        }
+
+        #conversation {
+          max-height: 400px;
+          padding: 15px;
+        }
+
+        .input-section {
+          flex-direction: column;
+        }
+
+        #user-input {
+          width: 100%;
+        }
+
+        #submit-button {
+          width: 100%;
+        }
+
+        .user-message,
+        .bot-bubble {
+          max-width: 85%;
+        }
+
+        .floating-actions {
+          bottom: 20px;
+          right: 20px;
+        }
+
+        .floating-btn {
+          width: 50px;
+          height: 50px;
+          font-size: 1.2rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="decor-top"></div>
+    <div id="decor-bottom"></div>
+    <!-- Progress indicator -->
+    <div class="progress-indicator">
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
+
+    <nav>
+      <div class="nav__header">
+        <div class="logo nav__logo">
+          <a href="index.html">Trial<span> Lens</span></a>
+        </div>
+        <div class="nav__menu__btn" id="menu-btn">
+          <span><i class="ri-menu-line"></i></span>
+        </div>
+      </div>
+      <ul class="nav__links" id="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="trials.html">Research Explorer</a></li>
+        <li><a href="bot.html">AI Assistant</a></li>
+        <li><a href="resources.html">Report Generation & Resources</a></li>
+      </ul>
+      <div class="nav__btn"></div>
+    </nav>
+
+    <header class="section__container header__container" id="home">
+      <div class="header__image">
+        <img
+          src="logo.png"
+          alt="Scout AI Assistant"
+          style="display: block; margin: 0 auto; width: 70%; height: 60%"
+        />
+      </div>
+      <div class="header__content">
+        <h1>AI<span> Assistant</span>.</h1>
+        <h3>
+          Your compassionate AI companion for navigating space biology research.
+        </h3>
+        <div style="margin-top: 30px">
+          <a href="trials.html" class="interactive-btn">🔍 Explore Insights</a>
+          <a href="resources.html" class="interactive-btn secondary"
+            >🔍 Resources</a
+          >
+        </div>
+      </div>
+    </header>
+
+    <!-- Feature highlights -->
+    <section class="section__container">
+      <div class="feature-grid">
+        <div class="feature-item">
+          <h4>Multilingual Support</h4>
+          <p>Chat in 20+ languages for comfortable communication</p>
+        </div>
+        <div class="feature-item">
+          <h4>Simple Language</h4>
+          <p>Complex reserarch terms explained simply and clearly</p>
+        </div>
+        <div class="feature-item">
+          <h4>Personalized Guidance</h4>
+          <p>Tailored information based on your specific needs</p>
+        </div>
+        <div class="feature-item">
+          <h4>24/7 Availability</h4>
+          <p>Get answers whenever you need them, day or night</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Chat section -->
+    <section class="section__container special__container" id="feature">
+      <h2 class="section__header">
+        Welcome to BioSpace Explorer — Your Space Biology AI Guide
+      </h2>
+      <p class="section__description">
+        Welcome to <b>BioSpace Explorer</b>, your AI companion for understanding
+        NASA’s space biology research. Ask questions about experiments, data,
+        and biological impacts of spaceflight. Get clear, accessible
+        explanations — from study goals and species involved to experimental
+        conditions, results, and future research needs. Whether you’re a
+        scientist, mission planner, or enthusiast, BioSpace Explorer helps you
+        navigate complex information with ease and confidence.
+      </p>
+
+      <div class="chat-container">
+        <ul id="conversation">
+          <li class="bot-message">
+            <span class="bot-avatar"></span>
+            <div class="bot-bubble">
+              Hello! I'm your BioSpace Explorer AI assistant. How can I help you
+              explore space biology today?
+            </div>
+          </li>
+        </ul>
+
+        <div class="input-section">
+          <input
+            type="text"
+            id="user-input"
+            placeholder="Ask me about space biology research..."
+          />
+          <button id="submit-button">Send</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Floating action buttons -->
+    <div class="floating-actions">
+      <button
+        class="floating-btn primary"
+        onclick="scrollToTop()"
+        title="Back to Top"
+      >
+        ↑
+      </button>
+      <button
+        class="floating-btn secondary"
+        onclick="window.location.href='index.html'"
+        title="Back to Home"
+      >
+        🏠
+      </button>
+    </div>
+
+    <footer class="footer" id="contact">
+      <div class="section__container footer__container">
+        <div class="footer__col">
+          <div class="logo footer__logo">
+            <a href="index.html">BioSpace<span>Explorer</span></a>
+          </div>
+          <p class="section__description">
+            Learn more about space biology with confidence.
+          </p>
+        </div>
+      </div>
+    </footer>
+
+    <script src="https://wizard-orpheus.hackclub.dev/wizard_orpheus.js"></script>
+    <script src="script.js"></script>
+
+    <script>
+      // Progress bar
+      window.addEventListener("scroll", () => {
+        const scrollTop = window.pageYOffset;
+        const documentHeight =
+          document.documentElement.scrollHeight - window.innerHeight;
+        const scrollPercent = (scrollTop / documentHeight) * 100;
+        document.getElementById("progressBar").style.width =
+          scrollPercent + "%";
+      });
+
+      function scrollToTop() {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+
+      // Mobile menu toggle
+      document.getElementById("menu-btn")?.addEventListener("click", () => {
+        document.getElementById("nav-links").classList.toggle("active");
+      });
+
+      // Auto-scroll chat to bottom when new messages arrive
+      const conversation = document.getElementById("conversation");
+      const observer = new MutationObserver(() => {
+        conversation.scrollTop = conversation.scrollHeight;
+      });
+      observer.observe(conversation, { childList: true, subtree: true });
+    </script>
+  </body>
+</html>
